@@ -19,6 +19,8 @@ namespace BO1ZombiesAutosplitter
     /// Change below key codes to your livesplit bindings
     /// 
     /// I have only tested this on resolution 1600x900
+    /// 
+    /// I have not yet tested every round up to 70, dont use this for real runs yet
     /// </summary>
     class Program
     {
