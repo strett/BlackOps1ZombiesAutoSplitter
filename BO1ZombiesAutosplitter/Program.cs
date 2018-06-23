@@ -18,9 +18,10 @@ namespace BO1ZombiesAutosplitter
     /// Note that the Black ops 1 window has to be on top for this to work
     /// Change below key codes to your livesplit bindings
     /// 
-    /// I have only tested this on resolution 1600x900
+    /// I have only tested this on resolution 1600x900, this is probably not going to
+    /// work on any other resolutions atm
     /// 
-    /// I have not yet tested every round up to 70, dont use this for real runs yet
+    /// I have tested round 1 up to 70 on Kino
     /// </summary>
     class Program
     {
@@ -343,8 +344,8 @@ namespace BO1ZombiesAutosplitter
                     firstReset = false;
                     resetDelayTick = 0;
                     currentLevel = 1;
-                    Logger.Log("RESET", LogType.INFO);
-                    Logger.Log("ROUND: " + currentLevel.ToString(), LogType.INFO);
+                    Log("RESET", LogType.INFO);
+                    Log("ROUND: " + currentLevel.ToString(), LogType.INFO);
 
                     // reset here
                     InputSimulator s = new InputSimulator();
@@ -359,7 +360,7 @@ namespace BO1ZombiesAutosplitter
                 if (currentLevel < level && level != -1)
                 {
                     currentLevel = level;
-                    Logger.Log("ROUND: " + currentLevel.ToString(), LogType.INFO);
+                    Log("ROUND: " + currentLevel.ToString(), LogType.INFO);
 
                     // split here
                     InputSimulator s = new InputSimulator();
@@ -371,7 +372,7 @@ namespace BO1ZombiesAutosplitter
                 Thread.Sleep(20);
             }
 
-            Logger.Log("Black ops 1 has exited", LogType.WARNING);
+            Log("Black ops 1 has exited", LogType.WARNING);
         }
 
         private static bool CheckIfReset(Bitmap bmp)
@@ -425,7 +426,7 @@ namespace BO1ZombiesAutosplitter
                     var pixel = bmp.GetPixel(point.X, point.Y);
 
                     // change to 55 if not working correctly
-                    if (!ColorsAreClose(redColor, pixel, 35))
+                    if (!ColorsAreClose(redColor, pixel, 55))
                     {
                         if (point.ShouldMatch)
                             matches = false;
@@ -461,12 +462,12 @@ namespace BO1ZombiesAutosplitter
 
             if (processes.Length == 0)
             {
-                Logger.Log("Black ops 1 is not running", LogType.ERROR);
+                Log("Black ops 1 is not running", LogType.ERROR);
                 return false;
             }
 
             BO1Process = processes[0];
-            Logger.Log("Succesfully found Black ops 1 process", LogType.SUCCESS);
+            Log("Succesfully found Black ops 1 process", LogType.SUCCESS);
 
             return true;
         }
@@ -521,6 +522,20 @@ namespace BO1ZombiesAutosplitter
             }
 
             return bmp;
+        }
+
+        public static void Log(string message, LogType type)
+        {
+            string date = "[" + DateTime.Now.ToLongTimeString() + "] ";
+            Console.WriteLine(date + type.ToString() + " : " + message);
+        }
+
+        public enum LogType
+        {
+            SUCCESS,
+            INFO,
+            WARNING,
+            ERROR,
         }
 
         private class User32
