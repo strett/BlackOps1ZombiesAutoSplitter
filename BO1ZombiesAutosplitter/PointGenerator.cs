@@ -37,5 +37,36 @@ namespace BO1ZombiesAutosplitter
 
             return points;
         }
+
+        internal static List<point> GeterateLevelPoints(int currentLevel)
+        {
+            Color colorToFind = Color.FromArgb(54, 0, 0);
+            List<point> points = new List<point>();
+
+            string file_path = AppDomain.CurrentDomain.BaseDirectory + "good_round_" + currentLevel.ToString() + ".png";
+
+            if (File.Exists(file_path))
+            {
+                Bitmap bmp = (Bitmap)Bitmap.FromFile(file_path);
+
+                for (int x = 0; x < bmp.Width; x += 4)
+                {
+                    for (int y = 0; y < bmp.Height; y += 4)
+                    {
+                        var clr = bmp.GetPixel(x, y);
+
+                        bool matches = Utils.ColorsAreClose(clr, colorToFind, 25);
+
+                        points.Add(new point(x, y, matches));
+                    }
+                }
+
+                bmp.Dispose();
+
+                return points;
+            }
+
+            return new List<point>();
+        }
     }
 }

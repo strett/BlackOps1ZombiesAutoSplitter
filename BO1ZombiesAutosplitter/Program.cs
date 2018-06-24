@@ -41,9 +41,6 @@ namespace BO1ZombiesAutosplitter
         static List<resolution> resolutions;
         static resolution selectedResolution;
 
-        // debug properties
-        static bool shouldBeResetting = true;
-
         [STAThread]
         static void Main(string[] args)
         {
@@ -79,7 +76,9 @@ namespace BO1ZombiesAutosplitter
                 {
                     case "quit": ExitProgram(); break;
                     case "reload": resolutions = Points.InitializePoints(); Log("Reloaded data", LogType.INFO); break;
-                    case "gen_reset": selectedResolution.reset_points = PointGenerator.GenerateResetPoints(); SaveData(); break;
+                    case "gen_reset": selectedResolution.reset_points = PointGenerator.GenerateResetPoints(); break;
+                    case "lvl": currentLevel = int.Parse(command[1]); break;
+                    case "save": SaveData(); break;
                 }
             }
         }
@@ -148,10 +147,6 @@ namespace BO1ZombiesAutosplitter
                     InputSimulator s = new InputSimulator();
                     s.Keyboard.KeyPress(reset_key);
                     s.Keyboard.KeyPress(split_key);
-
-                    #if DEBUG
-                    shouldBeResetting = false;
-                    #endif
                 }
                 bmpReset.Dispose();
 
@@ -231,9 +226,11 @@ namespace BO1ZombiesAutosplitter
                 selectedResolution.reset_rec.Height);
 
             Graphics g = level_form.CreateGraphics();
+            level_form.Invalidate();
             g.DrawRectangle(new Pen(Color.Red, 2), 0, 0, level_form.Width, level_form.Height);
 
             Graphics gg = reset_form.CreateGraphics();
+            reset_form.Invalidate();
             gg.DrawRectangle(new Pen(Color.Red, 2), 0, 0, reset_form.Width, reset_form.Height);
 
             var brushMatch = new SolidBrush(Color.Red);
@@ -289,12 +286,6 @@ namespace BO1ZombiesAutosplitter
             }
 
             bool matches = (((float)goodMatches / (float)selectedResolution.reset_points.Count) > 0.93f);
-
-            if (!shouldBeResetting && matches && resetDelayTick > 100)
-            {
-                Log("Reset when we shouldnt have", LogType.ERROR);
-                bmp.Save(AppDomain.CurrentDomain.BaseDirectory + "/wrong resets/" + new Random().Next(0, 99999) + "_shouldnt_reset_.png", ImageFormat.Png);
-            }
 
             return matches;
         }
@@ -366,6 +357,8 @@ namespace BO1ZombiesAutosplitter
 
         static Bitmap CaptureSceenshot(bool save = false)
         {
+            HideLevelDebugForm();
+
             var rect = new User32.Rect();
             User32.GetWindowRect(BO1Process.MainWindowHandle, ref rect);
 
@@ -388,6 +381,8 @@ namespace BO1ZombiesAutosplitter
                 Process.Start(AppDomain.CurrentDomain.BaseDirectory + "tmp.png");
             }
 
+            ShowLevelDebugForm();
+
             return bmp;
         }
 
@@ -401,6 +396,18 @@ namespace BO1ZombiesAutosplitter
         {
             reset_form.TopMost = true;
             reset_form.BringToFront();
+        }
+
+        static void HideLevelDebugForm()
+        {
+            level_form.TopMost = false;
+            level_form.SendToBack();
+        }
+
+        static void ShowLevelDebugForm()
+        {
+            level_form.TopMost = true;
+            level_form.BringToFront();
         }
 
         static Bitmap CaptureSceenshotReset(bool save = false)
