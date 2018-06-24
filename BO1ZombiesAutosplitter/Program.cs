@@ -128,7 +128,9 @@ namespace BO1ZombiesAutosplitter
         static DebugForm reset_form;
         private static void ReadLevel()
         {
+            #if DEBUG
             CreateDebugForms();
+            #endif
 
             while (!BO1Process.HasExited)
             {
@@ -165,7 +167,9 @@ namespace BO1ZombiesAutosplitter
 
                 bmp.Dispose();
 
+                #if DEBUG
                 SetDebugWindowPosition();
+                #endif
 
                 Thread.Sleep(20);
             }
@@ -388,26 +392,34 @@ namespace BO1ZombiesAutosplitter
 
         static void HideResetDebugForm()
         {
+#if DEBUG
             reset_form.TopMost = false;
             reset_form.SendToBack();
+#endif
         }
 
         static void ShowResetDebugForm()
         {
+#if DEBUG
             reset_form.TopMost = true;
             reset_form.BringToFront();
+#endif
         }
 
         static void HideLevelDebugForm()
         {
+#if DEBUG
             level_form.TopMost = false;
             level_form.SendToBack();
+#endif
         }
 
         static void ShowLevelDebugForm()
         {
+#if DEBUG
             level_form.TopMost = true;
             level_form.BringToFront();
+#endif
         }
 
         static Bitmap CaptureSceenshotReset(bool save = false)
