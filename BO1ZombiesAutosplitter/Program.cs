@@ -41,11 +41,17 @@ namespace BO1ZombiesAutosplitter
         static List<resolution> resolutions;
         static resolution selectedResolution;
 
+        static string data_dir;
+
         [STAThread]
         static void Main(string[] args)
         {
             if (!GetProcess())
                 ExitProgram();
+
+            data_dir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "debug");
+            if (!Directory.Exists(data_dir))
+                Directory.CreateDirectory(data_dir);
 
             resolutions = Points.InitializePoints();
 
@@ -72,20 +78,34 @@ namespace BO1ZombiesAutosplitter
 
                 string[] command = input.Split();
 
-                switch (command[0])
+                try
                 {
-                    case "quit": ExitProgram(); break;
-                    case "reload": resolutions = Points.InitializePoints(); Log("Reloaded data", LogType.INFO); break;
-                    case "gen_reset": selectedResolution.reset_points = PointGenerator.GenerateResetPoints(); break;
-                    case "lvl": currentLevel = int.Parse(command[1]); break;
-                    case "save": SaveData(); break;
+                    switch (command[0])
+                    {
+                        case "quit": ExitProgram(); break;
+                        case "reload": resolutions = Points.InitializePoints(); Log("Reloaded data", LogType.INFO); break;
+                        case "gen_reset": selectedResolution.reset_points = PointGenerator.GenerateResetPoints(data_dir, selectedResolution); break;
+                        case "lvl": currentLevel = int.Parse(command[1]); break;
+                        case "save": SaveData(); break;
+                        case "reset_rec": selectedResolution.reset_rec = new Rectangle(int.Parse(command[1]), int.Parse(command[2]), int.Parse(command[3]), int.Parse(command[4])); break;
+                        case "pic_reset": saveNext = true; break;
+                        case "level_rec": selectedResolution.level_rec = new Rectangle(int.Parse(command[1]), int.Parse(command[2]), int.Parse(command[3]), int.Parse(command[4])); break;
+                        case "pic_level": saveNextLevel = true; break;
+                        case "gen_level":
+                            selectedResolution.levels.Where(e => e.lvl == int.Parse(command[1])).First().pointsToMatch =
+                            PointGenerator.GeterateLevelPoints(data_dir, selectedResolution, int.Parse(command[1])).ToArray(); break;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log(ex.Message, LogType.ERROR);
                 }
             }
         }
 
         static void SaveData()
         {
-            for  (int i = 0; i < resolutions.Count; i++)
+            for (int i = 0; i < resolutions.Count; i++)
             {
                 var resolution = resolutions[i];
 
@@ -128,9 +148,9 @@ namespace BO1ZombiesAutosplitter
         static DebugForm reset_form;
         private static void ReadLevel()
         {
-            #if DEBUG
+#if DEBUG
             CreateDebugForms();
-            #endif
+#endif
 
             while (!BO1Process.HasExited)
             {
@@ -167,11 +187,11 @@ namespace BO1ZombiesAutosplitter
 
                 bmp.Dispose();
 
-                #if DEBUG
+#if DEBUG
                 SetDebugWindowPosition();
-                #endif
+#endif
 
-                Thread.Sleep(20);
+                Thread.Sleep(2);
             }
 
             Log("Black ops 1 has exited", LogType.WARNING);
@@ -205,7 +225,7 @@ namespace BO1ZombiesAutosplitter
                 selectedResolution.reset_rec.Width,
                 selectedResolution.reset_rec.Height);
 
-            reset_form.Show();            
+            reset_form.Show();
         }
 
         private static void SetDebugWindowPosition()
@@ -359,6 +379,7 @@ namespace BO1ZombiesAutosplitter
             Environment.Exit(-1);
         }
 
+        static bool saveNextLevel = false;
         static Bitmap CaptureSceenshot(bool save = false)
         {
             HideLevelDebugForm();
@@ -372,17 +393,19 @@ namespace BO1ZombiesAutosplitter
             var bmp = new Bitmap(width, height, PixelFormat.Format32bppArgb);
             Graphics graphics = Graphics.FromImage(bmp);
             graphics.CopyFromScreen(
-                rect.left + selectedResolution.level_rec.X, 
-                rect.top + selectedResolution.level_rec.Y, 
-                0, 0, 
+                rect.left + selectedResolution.level_rec.X,
+                rect.top + selectedResolution.level_rec.Y,
+                0, 0,
                 new Size(width, height), CopyPixelOperation.SourceCopy);
 
             graphics.Dispose();
 
-            if (save)
+            if (save || saveNextLevel)
             {
-                bmp.Save(AppDomain.CurrentDomain.BaseDirectory + "tmp.png", ImageFormat.Png);
-                Process.Start(AppDomain.CurrentDomain.BaseDirectory + "tmp.png");
+                bmp.Save(Path.Combine(data_dir, "level_" + selectedResolution.window_width + "x" + selectedResolution.window_height + ".png"), ImageFormat.Png);
+
+                if (saveNextLevel)
+                    saveNextLevel = false;
             }
 
             ShowLevelDebugForm();
@@ -422,6 +445,7 @@ namespace BO1ZombiesAutosplitter
 #endif
         }
 
+        static bool saveNext = false;
         static Bitmap CaptureSceenshotReset(bool save = false)
         {
             HideResetDebugForm();
@@ -438,10 +462,14 @@ namespace BO1ZombiesAutosplitter
 
             graphics.Dispose();
 
-            if (save)
+            if (save || saveNext)
             {
-                bmp.Save(AppDomain.CurrentDomain.BaseDirectory + "tmp.png", ImageFormat.Png);
-                Process.Start(AppDomain.CurrentDomain.BaseDirectory + "tmp.png");
+                string path = Path.Combine(data_dir, "reset_" + selectedResolution.window_width + "x" + selectedResolution.window_height + ".png");
+                bmp.Save(path, ImageFormat.Png);
+                Process.Start(path);
+
+                if (saveNext)
+                    saveNext = false;
             }
 
             ShowResetDebugForm();

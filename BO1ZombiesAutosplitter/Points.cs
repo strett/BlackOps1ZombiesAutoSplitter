@@ -17,6 +17,9 @@ namespace BO1ZombiesAutosplitter
                return JsonConvert.DeserializeObject<resolution[]>(File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "data.json")).ToList();
             }
 
+            //r.level_rec = new System.Drawing.Rectangle(0, 809, 250, 120);
+            //r.reset_rec = new System.Drawing.Rectangle(723, 341, 160, 60);
+
             return new List<resolution>();
 
             //return new resolution[]
