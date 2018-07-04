@@ -24,6 +24,8 @@ namespace ZombiesAutosplitter
 
         private GameWindow() { }
 
+        private GameState _gameState;
+
         public static GameWindow Attach()
         {
             GameWindow gameWindow = new GameWindow();
@@ -85,12 +87,16 @@ namespace ZombiesAutosplitter
             if ((GameState)numberLoadingState == GameState.LOADING_MAP)
                 state = GameState.LOADING_MAP;
 
+            _gameState = state;
+
             return state;
         }
 
         private bool hasBeenAboveResetLine = true;
         public bool CheckIsReset()
         {
+            if (_gameState != GameState.INGAME_ZOMBIES) return false;
+
             const int resetLine = 290;
 
             // 2F08A30 = some sort of timer that start at 0 when reset
@@ -103,7 +109,7 @@ namespace ZombiesAutosplitter
             if (hasBeenAboveResetLine && timerValue < resetLine)
             {
                 hasBeenAboveResetLine = false;
-                Logger.Log("Reset, going to reset..");
+                //Logger.Log("Reset, going to reset..");
             }
             else if (timerValue > resetLine && !hasBeenAboveResetLine)
             {

@@ -19,9 +19,12 @@ namespace ZombiesAutosplitter
         public static void AppendLogs()
         {
             lock (MessagesToLog) {
+                DateTime currentDate = DateTime.Now;
+                string timeStamp = currentDate.ToString("hh:mm:ss");
+
                 for (int i = 0; i < MessagesToLog.Count; i++)
                     Console.WriteLine(
-                        MessagesToLog[i].LogType.ToString()
+                        "[" + timeStamp + "] " + MessagesToLog[i].LogType.ToString()
                         + " : " + MessagesToLog[i].Message);
 
                 MessagesToLog.Clear();

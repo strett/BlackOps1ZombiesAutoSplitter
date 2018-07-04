@@ -59,24 +59,28 @@ namespace ZombiesAutosplitter
         {
             while (ProgramActive)
             {
-                if (window != null && window.Active)
+                try
                 {
-                    var state = window.GetMenuState();
-
-                    if (_lastState != state)
+                    if (window != null && window.Active)
                     {
-                        Logger.Log("STATE: " + state.ToString());
-                        _lastState = state;
+                        var state = window.GetMenuState();
+
+                        if (_lastState != state)
+                        {
+                            Logger.Log("STATE: " + state.ToString());
+                            _lastState = state;
+                        }
+
+                        if (window.CheckIsReset())
+                        {
+                            // press reset key here
+                        }
+
                     }
 
-                    if (window.CheckIsReset())
-                    {
-                        // press reset key here
-                    }
-
+                    Thread.Sleep(50);
                 }
-
-                Thread.Sleep(50);
+                catch { }
             }
         }
     }
