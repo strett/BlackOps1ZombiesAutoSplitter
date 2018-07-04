@@ -13,14 +13,14 @@ namespace ZombiesAutosplitter
 
         public static void Log(string message, LogType type = LogType.INFO)
         {
-            MessagesToLog.Add(new LogMessage(message + Environment.NewLine, type));
+            MessagesToLog.Add(new LogMessage(message, type));
         }
 
-        public static void AppendLogs(RichTextBox logTextbox)
+        public static void AppendLogs()
         {
             lock (MessagesToLog) {
                 for (int i = 0; i < MessagesToLog.Count; i++)
-                    logTextbox.AppendText(
+                    Console.WriteLine(
                         MessagesToLog[i].LogType.ToString()
                         + " : " + MessagesToLog[i].Message);
 
