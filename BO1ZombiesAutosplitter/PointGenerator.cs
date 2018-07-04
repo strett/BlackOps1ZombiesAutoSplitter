@@ -10,7 +10,7 @@ namespace BO1ZombiesAutosplitter
 {
     public static class PointGenerator
     {
-        public static List<point> GenerateResetPoints(string dir, resolution res)
+        public static List<point> GenerateResetPoints(string dir, Resolution res)
         {
             string path = Path.Combine(dir, "reset_" + res.window_width + "x" + res.window_height + ".png");
 
@@ -40,7 +40,7 @@ namespace BO1ZombiesAutosplitter
             return points;
         }
 
-        internal static List<point> GeterateLevelPoints(string data_dir, resolution res, int currentLevel)
+        internal static List<point> GeterateLevelPoints(string data_dir, Resolution res, int currentLevel)
         {
             Color colorToFind = Color.FromArgb(54, 0, 0);
             colorToFind = Color.FromArgb(214, 214, 214);

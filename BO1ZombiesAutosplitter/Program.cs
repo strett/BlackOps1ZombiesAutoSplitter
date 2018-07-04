@@ -38,10 +38,13 @@ namespace BO1ZombiesAutosplitter
         static Thread levelReadThread;
         static Thread inputThread;
 
-        static List<resolution> resolutions;
-        static resolution selectedResolution;
+        static List<Resolution> resolutions;
+        static Resolution selectedResolution;
+        static Map selectedMap = null;
 
         static string data_dir;
+
+        static bool LookForCurrentMap = false;
 
         [STAThread]
         static void Main(string[] args)
@@ -63,7 +66,7 @@ namespace BO1ZombiesAutosplitter
             else
                 Log("Found fitting resolution: " + selectedResolution.window_width + "x" + selectedResolution.window_height, LogType.INFO);
 
-            levelReadThread = new Thread(new ThreadStart(ReadLevel));
+            levelReadThread = new Thread(new ThreadStart(StartSplitter));
             levelReadThread.Start();
 
             inputThread = new Thread(new ThreadStart(ReadInput));
@@ -84,15 +87,15 @@ namespace BO1ZombiesAutosplitter
                     {
                         case "quit": ExitProgram(); break;
                         case "reload": resolutions = Points.InitializePoints(); Log("Reloaded data", LogType.INFO); break;
-                        case "gen_reset": selectedResolution.reset_points = PointGenerator.GenerateResetPoints(data_dir, selectedResolution); break;
+                        case "gen_reset": selectedMap.reset_points = PointGenerator.GenerateResetPoints(data_dir, selectedResolution); break;
                         case "lvl": currentLevel = int.Parse(command[1]); break;
                         case "save": SaveData(); break;
-                        case "reset_rec": selectedResolution.reset_rec = new Rectangle(int.Parse(command[1]), int.Parse(command[2]), int.Parse(command[3]), int.Parse(command[4])); break;
+                        case "reset_rec": selectedMap.reset_rec = new Rectangle(int.Parse(command[1]), int.Parse(command[2]), int.Parse(command[3]), int.Parse(command[4])); break;
                         case "pic_reset": saveNext = true; break;
-                        case "level_rec": selectedResolution.level_rec = new Rectangle(int.Parse(command[1]), int.Parse(command[2]), int.Parse(command[3]), int.Parse(command[4])); break;
+                        case "level_rec": selectedMap.level_rec = new Rectangle(int.Parse(command[1]), int.Parse(command[2]), int.Parse(command[3]), int.Parse(command[4])); break;
                         case "pic_level": saveNextLevel = true; break;
                         case "gen_level":
-                            selectedResolution.levels.Where(e => e.lvl == int.Parse(command[1])).First().pointsToMatch =
+                            selectedMap.levels.Where(e => e.lvl == int.Parse(command[1])).First().pointsToMatch =
                             PointGenerator.GeterateLevelPoints(data_dir, selectedResolution, int.Parse(command[1])).ToArray(); break;
                     }
                 }
@@ -105,17 +108,6 @@ namespace BO1ZombiesAutosplitter
 
         static void SaveData()
         {
-            for (int i = 0; i < resolutions.Count; i++)
-            {
-                var resolution = resolutions[i];
-
-                if (resolution.window_width == selectedResolution.window_width && resolution.window_height == selectedResolution.window_height)
-                {
-                    resolution.reset_points = selectedResolution.reset_points;
-                    resolution.levels = selectedResolution.levels;
-                }
-            }
-
             File.WriteAllText(AppDomain.CurrentDomain.BaseDirectory + "data.json", JsonConvert.SerializeObject(resolutions, Formatting.Indented));
         }
 
@@ -146,55 +138,113 @@ namespace BO1ZombiesAutosplitter
         static bool firstReset = true;
         static DebugForm level_form;
         static DebugForm reset_form;
-        private static void ReadLevel()
+        private static void StartSplitter()
         {
-#if DEBUG
-            CreateDebugForms();
-#endif
-
             while (!BO1Process.HasExited)
             {
-                resetDelayTick++;
+                //try
+                //{
+                    resetDelayTick++;
 
-                var bmpReset = CaptureSceenshotReset();
-                if (CheckIfReset(bmpReset) && (resetDelayTick > 100 || firstReset))
-                {
-                    firstReset = false;
-                    resetDelayTick = 0;
-                    currentLevel = 1;
-                    Log("RESET", LogType.INFO);
-                    Log("ROUND: " + currentLevel.ToString(), LogType.INFO);
+                    if (selectedMap != null)
+                    {
+                        var bmpReset = CaptureSceenshotReset();
+                        if (CheckIfReset(bmpReset) && (resetDelayTick > 100 || firstReset))
+                        {
+                            firstReset = false;
+                            resetDelayTick = 0;
+                            currentLevel = 1;
+                            Log("RESET", LogType.INFO);
+                            Log("ROUND: " + currentLevel.ToString(), LogType.INFO);
 
-                    // reset here
-                    InputSimulator s = new InputSimulator();
-                    s.Keyboard.KeyPress(reset_key);
-                    s.Keyboard.KeyPress(split_key);
-                }
-                bmpReset.Dispose();
+                            // reset here
+                            InputSimulator s = new InputSimulator();
+                            s.Keyboard.KeyPress(reset_key);
+                            s.Keyboard.KeyPress(split_key);
+                        }
+                        bmpReset.Dispose();
 
-                var bmp = CaptureSceenshot();
-                int level = ReadLevelFromBmp(bmp);
+                        var bmp = CaptureLevelSceenshot();
+                        int level = ReadLevelFromBmp(bmp);
 
-                if (currentLevel < level && level != -1)
-                {
-                    currentLevel = level;
-                    Log("ROUND: " + currentLevel.ToString(), LogType.INFO);
+                        if (currentLevel < level && level != -1)
+                        {
+                            currentLevel = level;
+                            Log("ROUND: " + currentLevel.ToString(), LogType.INFO);
 
-                    // split here
-                    InputSimulator s = new InputSimulator();
-                    s.Keyboard.KeyPress(split_key);
-                }
+                            // split here
+                            InputSimulator s = new InputSimulator();
+                            s.Keyboard.KeyPress(split_key);
+                        }
 
-                bmp.Dispose();
+                        bmp.Dispose();
+                    }
+
+                    if (IsInLoadingScreen() && !LookForCurrentMap)
+                    {
+                        LookForCurrentMap = true;
+                        Log("Currently loading new map..", LogType.INFO);
+                    }
+
+                    if (LookForCurrentMap)
+                    {
+                        if (GetCurrentMap())
+                        {
+                            LookForCurrentMap = false;
+
+                            Log($"Found map {selectedMap.map_name}", LogType.SUCCESS);
+
+                            #if DEBUG
+                            CreateDebugForms();
+                            #endif
+                        }
+                        else
+                        {
+                            Log("Current map not supported for resolution", LogType.WARNING);
+                        }
+                    }
 
 #if DEBUG
-                SetDebugWindowPosition();
+                    SetDebugWindowPosition();
 #endif
 
-                Thread.Sleep(2);
+                    Thread.Sleep(2);
+                //}
+                //catch (Exception ex)
+                //{
+                //    Log(ex.Message, LogType.ERROR);
+                //}
             }
 
             Log("Black ops 1 has exited", LogType.WARNING);
+        }
+
+        private static bool GetCurrentMap()
+        {
+            //throw new NotImplementedException();
+            return false;
+        }
+
+        private static bool IsInLoadingScreen()
+        {
+            var bmp = CaptureLoadingSceenshot();
+            var colorToMatch = Color.Black;
+            bool found = true;
+            for (int x = 0; x < bmp.Width; x++)
+            {
+                for (int y = 0; y < bmp.Height; y++)
+                {
+                    var pixel = bmp.GetPixel(x, y);
+                    if (!Utils.ColorsAreClose(pixel, colorToMatch, 10))
+                    {
+                        found = false;
+                    }
+                }
+            }
+
+            bmp.Dispose();
+
+            return found;
         }
 
         private static void CreateDebugForms()
@@ -206,48 +256,50 @@ namespace BO1ZombiesAutosplitter
             level_form = new DebugForm();
 
             level_form.Location = new Point(
-                selectedResolution.level_rec.X + rect.left,
-                selectedResolution.level_rec.Y + rect.top);
+                selectedMap.level_rec.X + rect.left,
+                selectedMap.level_rec.Y + rect.top);
 
             level_form.Size = new Size(
-                selectedResolution.level_rec.Width,
-                selectedResolution.level_rec.Height);
+                selectedMap.level_rec.Width,
+                selectedMap.level_rec.Height);
 
             level_form.Show();
 
             reset_form = new DebugForm();
 
             reset_form.Location = new Point(
-                selectedResolution.reset_rec.X + rect.left,
-                selectedResolution.reset_rec.Y + rect.top);
+                selectedMap.reset_rec.X + rect.left,
+                selectedMap.reset_rec.Y + rect.top);
 
             reset_form.Size = new Size(
-                selectedResolution.reset_rec.Width,
-                selectedResolution.reset_rec.Height);
+                selectedMap.reset_rec.Width,
+                selectedMap.reset_rec.Height);
 
             reset_form.Show();
         }
 
         private static void SetDebugWindowPosition()
         {
+            if (level_form == null || reset_form == null) return;
+
             var rect = new User32.Rect();
             User32.GetWindowRect(BO1Process.MainWindowHandle, ref rect);
 
             level_form.Location = new Point(
-             selectedResolution.level_rec.X + rect.left,
-             selectedResolution.level_rec.Y + rect.top);
+             selectedMap.level_rec.X + rect.left,
+             selectedMap.level_rec.Y + rect.top);
 
             level_form.Size = new Size(
-                selectedResolution.level_rec.Width,
-                selectedResolution.level_rec.Height);
+                selectedMap.level_rec.Width,
+                selectedMap.level_rec.Height);
 
             reset_form.Location = new Point(
-                selectedResolution.reset_rec.X + rect.left,
-                selectedResolution.reset_rec.Y + rect.top);
+                selectedMap.reset_rec.X + rect.left,
+                selectedMap.reset_rec.Y + rect.top);
 
             reset_form.Size = new Size(
-                selectedResolution.reset_rec.Width,
-                selectedResolution.reset_rec.Height);
+                selectedMap.reset_rec.Width,
+                selectedMap.reset_rec.Height);
 
             Graphics g = level_form.CreateGraphics();
             level_form.Invalidate();
@@ -259,7 +311,7 @@ namespace BO1ZombiesAutosplitter
 
             var brushMatch = new SolidBrush(Color.Red);
             var brushNMatch = new SolidBrush(Color.Black);
-            foreach (var point in selectedResolution.reset_points)
+            foreach (var point in selectedMap.reset_points)
             {
                 if (point.ShouldMatch)
                     gg.FillRectangle(brushMatch, point.X, point.Y, 1, 1);
@@ -269,7 +321,7 @@ namespace BO1ZombiesAutosplitter
 
             if (currentLevel != 0)
             {
-                var crntLvl = selectedResolution.levels.Where(e => e.lvl == currentLevel).First();
+                var crntLvl = selectedMap.levels.Where(e => e.lvl == currentLevel).First();
                 foreach (var point in crntLvl.pointsToMatch)
                 {
                     if (point.ShouldMatch)
@@ -289,12 +341,12 @@ namespace BO1ZombiesAutosplitter
         {
             Color clr = Color.FromArgb(214, 214, 214);
 
-            if (selectedResolution.reset_points == null) return false;
+            if (selectedMap.reset_points == null) return false;
 
             int goodMatches = 0;
-            for (int i = 0; i < selectedResolution.reset_points.Count; i++)
+            for (int i = 0; i < selectedMap.reset_points.Count; i++)
             {
-                var point = selectedResolution.reset_points[i];
+                var point = selectedMap.reset_points[i];
                 var pixel = bmp.GetPixel(point.X, point.Y);
 
                 if (Utils.ColorsAreClose(pixel, clr, 25))
@@ -309,7 +361,7 @@ namespace BO1ZombiesAutosplitter
                 }
             }
 
-            bool matches = (((float)goodMatches / (float)selectedResolution.reset_points.Count) > 0.93f);
+            bool matches = (((float)goodMatches / (float)selectedMap.reset_points.Count) > 0.93f);
 
             return matches;
         }
@@ -320,14 +372,14 @@ namespace BO1ZombiesAutosplitter
             Color redColor = Color.FromArgb(174, 174, 174);
             //Color redColor = Color.FromArgb(54, 0, 0);
 
-            if (selectedResolution.levels == null) return -1;
+            if (selectedMap.levels == null) return -1;
 
-            for (int l = 0; l < selectedResolution.levels.Count; l++)
+            for (int l = 0; l < selectedMap.levels.Count; l++)
             {
                 bool matches = true;
-                for (int c = 0; c < selectedResolution.levels[l].pointsToMatch.Length; c++)
+                for (int c = 0; c < selectedMap.levels[l].pointsToMatch.Length; c++)
                 {
-                    var point = selectedResolution.levels[l].pointsToMatch[c];
+                    var point = selectedMap.levels[l].pointsToMatch[c];
                     var pixel = bmp.GetPixel(point.X, point.Y);
 
                     // change to 55 if not working correctly
@@ -346,7 +398,7 @@ namespace BO1ZombiesAutosplitter
 
                 if (matches)
                 {
-                    return selectedResolution.levels[l].lvl;
+                    return selectedMap.levels[l].lvl;
                 }
             }
 
@@ -380,21 +432,21 @@ namespace BO1ZombiesAutosplitter
         }
 
         static bool saveNextLevel = false;
-        static Bitmap CaptureSceenshot(bool save = false)
+        static Bitmap CaptureLevelSceenshot(bool save = false)
         {
             HideLevelDebugForm();
 
             var rect = new User32.Rect();
             User32.GetWindowRect(BO1Process.MainWindowHandle, ref rect);
 
-            int width = selectedResolution.level_rec.Width;
-            int height = selectedResolution.level_rec.Height;
+            int width = selectedMap.level_rec.Width;
+            int height = selectedMap.level_rec.Height;
 
             var bmp = new Bitmap(width, height, PixelFormat.Format32bppArgb);
             Graphics graphics = Graphics.FromImage(bmp);
             graphics.CopyFromScreen(
-                rect.left + selectedResolution.level_rec.X,
-                rect.top + selectedResolution.level_rec.Y,
+                rect.left + selectedMap.level_rec.X,
+                rect.top + selectedMap.level_rec.Y,
                 0, 0,
                 new Size(width, height), CopyPixelOperation.SourceCopy);
 
@@ -413,35 +465,68 @@ namespace BO1ZombiesAutosplitter
             return bmp;
         }
 
+        static Bitmap CaptureLoadingSceenshot()
+        {
+            var rect = new User32.Rect();
+            User32.GetWindowRect(BO1Process.MainWindowHandle, ref rect);
+
+            int width = 300;
+            int height = 300;
+
+            var bmp = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+            Graphics graphics = Graphics.FromImage(bmp);
+            graphics.CopyFromScreen(
+                rect.left + 100,
+                rect.top + 100,
+                0, 0,
+                new Size(width, height), CopyPixelOperation.SourceCopy);
+
+            graphics.Dispose();
+
+            return bmp;
+        }
+
         static void HideResetDebugForm()
         {
 #if DEBUG
-            reset_form.TopMost = false;
-            reset_form.SendToBack();
+            if (reset_form != null)
+            {
+                reset_form.TopMost = false;
+                reset_form.SendToBack();
+            }
 #endif
         }
 
         static void ShowResetDebugForm()
         {
 #if DEBUG
-            reset_form.TopMost = true;
-            reset_form.BringToFront();
+            if (reset_form != null)
+            {
+                reset_form.TopMost = true;
+                reset_form.BringToFront();
+            }
 #endif
         }
 
         static void HideLevelDebugForm()
         {
 #if DEBUG
-            level_form.TopMost = false;
-            level_form.SendToBack();
+            if (level_form != null)
+            {
+                level_form.TopMost = false;
+                level_form.SendToBack();
+            }
 #endif
         }
 
         static void ShowLevelDebugForm()
         {
 #if DEBUG
-            level_form.TopMost = true;
-            level_form.BringToFront();
+            if (level_form != null)
+            {
+                level_form.TopMost = true;
+                level_form.BringToFront();
+            }
 #endif
         }
 
@@ -453,12 +538,12 @@ namespace BO1ZombiesAutosplitter
             var rect = new User32.Rect();
             User32.GetWindowRect(BO1Process.MainWindowHandle, ref rect);
 
-            int width = selectedResolution.reset_rec.Width;
-            int height = selectedResolution.reset_rec.Height;
+            int width = selectedMap.reset_rec.Width;
+            int height = selectedMap.reset_rec.Height;
 
             var bmp = new Bitmap(width, height, PixelFormat.Format32bppArgb);
             Graphics graphics = Graphics.FromImage(bmp);
-            graphics.CopyFromScreen(rect.left + selectedResolution.reset_rec.X, rect.top + selectedResolution.reset_rec.Y, 0, 0, new Size(width, height), CopyPixelOperation.SourceCopy);
+            graphics.CopyFromScreen(rect.left + selectedMap.reset_rec.X, rect.top + selectedMap.reset_rec.Y, 0, 0, new Size(width, height), CopyPixelOperation.SourceCopy);
 
             graphics.Dispose();
 
@@ -527,15 +612,21 @@ namespace BO1ZombiesAutosplitter
         }
     }
 
-    public class resolution
+    public class Map
     {
+        public string map_name;
         public List<level> levels;
         public List<point> reset_points;
 
+        public Rectangle level_rec;
+        public Rectangle reset_rec;
+    }
+
+    public class Resolution
+    {
         public int window_width;
         public int window_height;
 
-        public Rectangle level_rec;
-        public Rectangle reset_rec;
+        public List<Map> Maps { get; set; }
     }
 }
