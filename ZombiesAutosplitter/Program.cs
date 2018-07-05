@@ -92,6 +92,8 @@ namespace ZombiesAutosplitter
                             LivesplitHelper.ResetAndStart();
                         }
 
+                        window.CheckLevel();
+
                         var pauseState = window.GetPauseState();
                         switch (pauseState)
                         {

@@ -97,6 +97,63 @@ namespace ZombiesAutosplitter
             return state;
         }
 
+        int _currentLevel = 0;
+        int _lastValue = 0;
+        DateTime _levelEndStamp;
+        bool _timestampSet = false;
+        bool _levelIncremented = false;
+        public void CheckLevel()
+        {
+            //const int waitSpanMS = 10000;
+            
+            //// 0x01809A34 = some sort of timer that start at 0 when reset
+            //// 0x01809A34 is a few offsets added together
+            //byte[] valBuffer = new byte[4];
+            //IntPtr baseAddress = _process.MainModule.BaseAddress;
+            //IntPtr valAddr = IntPtr.Add(baseAddress, 0x01809A34);
+
+            //User32Helper.ReadProcessMemory(_process.Handle, valAddr, valBuffer, 4, out IntPtr numberOfBytesRead);
+
+            //int valValue = BitConverter.ToInt32(valBuffer, 0);
+
+            //var ms = (DateTime.Now - _levelEndStamp).TotalMilliseconds;
+
+            //// entered once when timer increases
+            //if (valValue > _lastValue && _lastValue > 0 && !_timestampSet)
+            //{
+            //    Logger.Log("entered");
+            //    if (!_timestampSet)
+            //    {
+            //        _levelEndStamp = DateTime.Now;
+            //        _timestampSet = true;
+            //        _levelIncremented = false;
+            //    }
+            //}
+            //else
+            //{
+            //    if (_currentLevel == 0)
+            //    {
+            //        _currentLevel++;
+            //        Logger.Log("LEVEL: " + _currentLevel.ToString());
+            //    }
+            //}
+
+            //if (ms > waitSpanMS && _timestampSet && !_levelIncremented)
+            //{
+            //    _currentLevel++;
+            //    Logger.Log("LEVEL: " + _currentLevel.ToString());
+            //    _levelIncremented = true;
+            //}
+
+            //if (ms > waitSpanMS && _timestampSet && _levelIncremented)
+            //{
+            //    Logger.Log("ready for next level");
+            //    _timestampSet = false;
+            //}
+
+            //_lastValue = valValue;
+        }
+
         private bool hasBeenAboveResetLine = true;
         public bool CheckIsReset()
         {
@@ -120,6 +177,8 @@ namespace ZombiesAutosplitter
             {
                 hasBeenAboveResetLine = true;
                 Logger.Log("Reset");
+                _lastValue = 0;
+                _currentLevel = 0;
                 return true;
             }
 
