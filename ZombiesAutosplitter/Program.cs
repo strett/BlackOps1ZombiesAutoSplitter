@@ -74,6 +74,7 @@ namespace ZombiesAutosplitter
                         if (window.CheckIsReset())
                         {
                             // press reset key here
+                            LivesplitHelper.Reset();
                         }
 
                     }

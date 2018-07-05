@@ -124,6 +124,7 @@ namespace ZombiesAutosplitter
 
     public enum GameState : int
     {
+        INTRO_SCREEN = 1,
         INGAME_ZOMBIES = 0,
         MAIN_MENU = 8,
         CAMPAIGN_OPTIONS = 7,
