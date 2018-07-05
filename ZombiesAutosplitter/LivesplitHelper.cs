@@ -9,12 +9,23 @@ namespace ZombiesAutosplitter
         static VirtualKeyCode splitKey = VirtualKeyCode.NUMPAD1;
         static VirtualKeyCode pauseKey = VirtualKeyCode.NUMPAD3;
 
+        public static void ResetAndStart()
+        {
+            InputSimulator s = new InputSimulator();
+            s.Keyboard.KeyPress(resetKey);
+            s.Keyboard.KeyPress(splitKey); 
+        }
+
         public static void Reset()
         {
             InputSimulator s = new InputSimulator();
-
             s.Keyboard.KeyPress(resetKey);
-            s.Keyboard.KeyPress(splitKey); 
+        }
+
+        public static void TogglePause()
+        {
+            InputSimulator s = new InputSimulator();
+            s.Keyboard.KeyPress(pauseKey);
         }
     }
 }

@@ -74,12 +74,18 @@ namespace ZombiesAutosplitter
                         if (window.CheckIsReset())
                         {
                             // press reset key here
-                            LivesplitHelper.Reset();
+                            LivesplitHelper.ResetAndStart();
                         }
 
+                        var pauseState = window.GetPauseState();
+                        switch (pauseState)
+                        {
+                            case PauseState.PAUSED: LivesplitHelper.TogglePause(); break;
+                            case PauseState.RESUMED: LivesplitHelper.TogglePause(); break;
+                        }
                     }
 
-                    Thread.Sleep(50);
+                    Thread.Sleep(5);
                 }
                 catch { }
             }

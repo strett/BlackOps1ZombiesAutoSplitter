@@ -13,6 +13,8 @@ namespace ZombiesAutosplitter
     {
         public bool Active { get; set; } = false;
 
+        public bool GamePaused { get; set; } = false;
+
         public int Width { get; set; }
         public int Height { get; set; }
 
@@ -87,7 +89,10 @@ namespace ZombiesAutosplitter
             if ((GameState)numberLoadingState == GameState.LOADING_MAP)
                 state = GameState.LOADING_MAP;
 
-            _gameState = state;
+            if (_gameState == GameState.INGAME_ZOMBIES && state != GameState.INGAME_ZOMBIES)
+                LivesplitHelper.Reset();
+
+                _gameState = state;
 
             return state;
         }
@@ -120,6 +125,40 @@ namespace ZombiesAutosplitter
 
             return false;
         }
+
+        public PauseState GetPauseState()
+        {
+            if (_gameState != GameState.INGAME_ZOMBIES) return PauseState.NO_CHANGE;
+
+            // 2EE7F2C = 0 if paused, 1065353216 if playing
+            byte[] pauseBuffer = new byte[4];
+            IntPtr baseAddress = _process.MainModule.BaseAddress;
+            IntPtr pauseAddr = IntPtr.Add(baseAddress, 0x2EE7F2C);
+            User32Helper.ReadProcessMemory(_process.Handle, pauseAddr, pauseBuffer, 4, out IntPtr numberOfBytesRead);
+
+            int pauseValue = BitConverter.ToInt32(pauseBuffer, 0);
+
+            if (GamePaused && pauseValue == 1065353216)
+            {
+                GamePaused = false;
+                // game resumed
+                return PauseState.RESUMED;
+            }
+            else if (!GamePaused && pauseValue == 0)
+            {
+                GamePaused = true;
+                return PauseState.PAUSED;
+            }
+
+            return PauseState.NO_CHANGE;
+        }
+    }
+
+    public enum PauseState
+    {
+        RESUMED,
+        PAUSED,
+        NO_CHANGE
     }
 
     public enum GameState : int
