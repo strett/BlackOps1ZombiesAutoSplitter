@@ -16,6 +16,8 @@ namespace ZombiesAutosplitter
 
         static void Main()
         {
+            PrintNotice();
+
             processFindThread = new Thread(new ThreadStart(FindWindow));
             logAppendThread = new Thread(new ThreadStart(AppendLogs));
             checkStateThread = new Thread(new ThreadStart(CheckGameState));
@@ -32,6 +34,19 @@ namespace ZombiesAutosplitter
 
         public static bool ProgramActive { get; set; } = true;
 
+        private static void PrintNotice()
+        {
+            Logger.Log("=======================================================================================");
+            Logger.Log(@"Split key = numpad1");
+            Logger.Log(@"Reset key = numpad2");
+            Logger.Log(@"Pause key = numpad3");
+            Logger.Log(@"These key bindings are currently fixed. It is imporant that the keybindings are numpad");
+            Logger.Log(@"keys else we wont be able to split when shift key is down.");
+            Logger.Log(@"---------------------------------------------------------------------------------------");
+            Logger.Log(@"This program has te be launched before starting a run or it won't work properly.");
+            Logger.Log(@"https://github.com/aldrikboy/BlackOps1ZombiesAutoSplitter");
+            Logger.Log("=======================================================================================");
+        }
 
         private static void FindWindow()
         {
