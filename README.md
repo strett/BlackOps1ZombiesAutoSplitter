@@ -1,7 +1,7 @@
 # Black Ops 1 Zombies Auto Splitter
 Autosplitter for Black ops 1 Zombies
 
--currently only resets. splitting & pausing will be here soon.
+- Resetting and pausing/resuming working. Splitting will be here soon.
 
 ## Important
 Split key = numpad1
