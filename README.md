@@ -1,4 +1,11 @@
 # Black Ops 1 Zombies Auto Splitter
-Autosplitter for Black ops 1 Zombies (Round 1,2,3,4,5,10,15,30,50,70)
+Autosplitter for Black ops 1 Zombies
 
--currently only resets, splitting & pausing will be here soon
+-currently only resets. splitting & pausing will be here soon.
+
+## Important
+Split key = numpad1
+Reset key = numpad2
+Pause key = numpad3
+
+These key bindings are currently fixed. It is imporant that the keybindings are numpad keys else we wont be able to split when shift key is down.
