@@ -126,6 +126,7 @@ namespace ZombiesAutosplitter
         bool _timestampSet = false;
         bool _levelIncremented = false;
         public bool first = false;
+        public bool IsWeirdMap = false;
         public void CheckLevel()
         {
             if (_gameState != GameState.INGAME_ZOMBIES) return;
@@ -194,6 +195,9 @@ namespace ZombiesAutosplitter
                 hasBeenAboveResetLine = true;
                 Logger.Log("Reset");
                 _currentLevel = 1;
+
+                if (IsWeirdMap)
+                    first = true;
                 return true;
             }
 

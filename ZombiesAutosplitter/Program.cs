@@ -80,6 +80,7 @@ namespace ZombiesAutosplitter
             if (level == "y" || level == "Y")
             {
                 window.first = true;
+                window.IsWeirdMap = true;
             }
         }
 
