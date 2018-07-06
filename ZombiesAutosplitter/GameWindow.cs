@@ -125,7 +125,7 @@ namespace ZombiesAutosplitter
         DateTime _levelEndStamp = DateTime.UtcNow;
         bool _timestampSet = false;
         bool _levelIncremented = false;
-        bool first = true;
+        public bool first = false;
         public void CheckLevel()
         {
             if (_gameState != GameState.INGAME_ZOMBIES) return;
@@ -148,10 +148,10 @@ namespace ZombiesAutosplitter
                 _timestampSet = false;
                 _levelIncremented = true;
 
-                //if (!first)
+                if (!first)
                     _currentLevel++;
-                //else
-                //    first = false;
+                else
+                    first = false;
 
                 if (roundsToSplit.Any(e => e == _currentLevel))
                 {

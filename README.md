@@ -2,6 +2,7 @@
 Autosplitter for Black ops 1 Zombies
 
 - Resetting, splitting and pausing/resuming working.
+- Start timer at -5 for Ascension
 
 ## Important
 Split key = numpad1
