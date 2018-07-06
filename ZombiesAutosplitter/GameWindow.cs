@@ -125,8 +125,11 @@ namespace ZombiesAutosplitter
         DateTime _levelEndStamp = DateTime.UtcNow;
         bool _timestampSet = false;
         bool _levelIncremented = false;
+        bool first = true;
         public void CheckLevel()
         {
+            if (_gameState != GameState.INGAME_ZOMBIES) return;
+
             //// 0x01809A34 = some sort of timer that start at 0 when reset
             //// 0x01809A34 is a few offsets added together
             //// 165695D = 255 on level change, then 0 just before new level appears then 255 again and then 0 when level is red
@@ -144,7 +147,11 @@ namespace ZombiesAutosplitter
             {
                 _timestampSet = false;
                 _levelIncremented = true;
-                _currentLevel++;
+
+                //if (!first)
+                    _currentLevel++;
+                //else
+                //    first = false;
 
                 if (roundsToSplit.Any(e => e == _currentLevel))
                 {
@@ -153,7 +160,7 @@ namespace ZombiesAutosplitter
                 }
             }
 
-            if (ms < 20000) return;
+            if (ms < 25000) return;
 
             if (timerValue && !_timestampSet)
             {
