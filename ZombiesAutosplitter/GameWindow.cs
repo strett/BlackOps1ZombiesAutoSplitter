@@ -111,7 +111,12 @@ namespace ZombiesAutosplitter
 
             int numberLoadingState = BitConverter.ToInt32(loadingStateBuffer, 0);
             if ((GameState)numberLoadingState == GameState.LOADING_MAP)
+            {
                 state = GameState.LOADING_MAP;
+
+                if (_gameState != GameState.LOADING_MAP)
+                _levelEndStamp = DateTime.UtcNow;
+            }
 
             if (_gameState == GameState.INGAME_ZOMBIES && state != GameState.INGAME_ZOMBIES)
                 LivesplitHelper.Reset();
@@ -125,8 +130,6 @@ namespace ZombiesAutosplitter
         DateTime _levelEndStamp = DateTime.UtcNow;
         bool _timestampSet = false;
         bool _levelIncremented = false;
-        public bool first = false;
-        public bool IsWeirdMap = false;
         public void CheckLevel()
         {
             if (_gameState != GameState.INGAME_ZOMBIES) return;
@@ -148,11 +151,8 @@ namespace ZombiesAutosplitter
             {
                 _timestampSet = false;
                 _levelIncremented = true;
-
-                if (!first)
-                    _currentLevel++;
-                else
-                    first = false;
+           
+                 _currentLevel++;
 
                 if (roundsToSplit.Any(e => e == _currentLevel))
                 {
@@ -161,7 +161,7 @@ namespace ZombiesAutosplitter
                 }
             }
 
-            if (ms < 25000) return;
+            if (ms < 20000) return;
 
             if (timerValue && !_timestampSet)
             {
@@ -194,10 +194,10 @@ namespace ZombiesAutosplitter
             {
                 hasBeenAboveResetLine = true;
                 Logger.Log("Reset");
+                _levelEndStamp = DateTime.UtcNow;
+                _timestampSet = false;
                 _currentLevel = 1;
 
-                if (IsWeirdMap)
-                    first = true;
                 return true;
             }
 

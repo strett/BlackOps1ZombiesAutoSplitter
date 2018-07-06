@@ -68,20 +68,6 @@ namespace ZombiesAutosplitter
             }
 
             window.SetRunLevel(int.Parse(input));
-
-            string[] acceptedInputNY = new string[4] { "n", "N", "y", "Y" };
-            string level = "";
-            while (!acceptedInputNY.Any(e => e == level))
-            {
-                Logger.Log("Are you playing Ascension? Y/N");
-                level = Console.ReadLine();
-            }
-
-            if (level == "y" || level == "Y")
-            {
-                window.first = true;
-                window.IsWeirdMap = true;
-            }
         }
 
         private static void FindWindow()
