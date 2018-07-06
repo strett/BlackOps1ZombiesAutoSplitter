@@ -1,4 +1,5 @@
-﻿using WindowsInput;
+﻿using System;
+using WindowsInput;
 using WindowsInput.Native;
 
 namespace ZombiesAutosplitter
@@ -26,6 +27,12 @@ namespace ZombiesAutosplitter
         {
             InputSimulator s = new InputSimulator();
             s.Keyboard.KeyPress(pauseKey);
+        }
+
+        public static void Split()
+        {
+            InputSimulator s = new InputSimulator();
+            s.Keyboard.KeyPress(splitKey);
         }
     }
 }

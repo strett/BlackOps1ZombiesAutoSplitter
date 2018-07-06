@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 
 namespace ZombiesAutosplitter
@@ -20,13 +21,17 @@ namespace ZombiesAutosplitter
 
             processFindThread = new Thread(new ThreadStart(FindWindow));
             logAppendThread = new Thread(new ThreadStart(AppendLogs));
-            checkStateThread = new Thread(new ThreadStart(CheckGameState));
 
-            logAppendThread.Start();
             processFindThread.Start();
+            logAppendThread.Start();
+
+            AskForRunLevel();
+
+            checkStateThread = new Thread(new ThreadStart(CheckGameState));
             checkStateThread.Start();
 
             
+            while (true)
             Console.Read();
 
             ProgramActive = false;
@@ -48,17 +53,39 @@ namespace ZombiesAutosplitter
             Logger.Log("=======================================================================================");
         }
 
+        private static void AskForRunLevel()
+        {
+            Logger.Log("This bot will split at round [2,3,4,5,10,15,30,50,70,100], make sure you dont have any other splits in your timer");
+
+            string[] acceptedInput = new string[6] { "5", "15", "30", "50", "70", "100" };
+
+            string input = "";
+            while (!acceptedInput.Any(e => e == input))
+            {
+                Logger.Log("What round are you running? [5,15,30,50,70,100]");
+                Logger.Log("Round: ");
+                input = Console.ReadLine();
+            }
+
+            window.SetRunLevel(int.Parse(input));
+        }
+
         private static void FindWindow()
         {
             window = GameWindow.Attach();
 
             while (!window.Active && ProgramActive)
             {
-                window = GameWindow.Attach();
-                Thread.Sleep(100);
+                try
+                {
+                    window = GameWindow.Attach();
+                    Thread.Sleep(100);
+                }
+                catch (Exception ex)
+                {
+                    Logger.Log(ex.Message, LogType.ERROR);
+                }
             }
-
-            Logger.Log("Window found");
         }
 
         private static void AppendLogs()
@@ -104,7 +131,10 @@ namespace ZombiesAutosplitter
 
                     Thread.Sleep(5);
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    Logger.Log(ex.Message, LogType.ERROR);
+                }
             }
         }
     }

@@ -28,12 +28,36 @@ namespace ZombiesAutosplitter
 
         private GameState _gameState;
 
+        List<int> roundsToSplit = new List<int>();
+
         public static GameWindow Attach()
         {
             GameWindow gameWindow = new GameWindow();
             gameWindow.FindProcess();
 
             return gameWindow;
+        }
+
+        public void SetRunLevel(int maxLevel)
+        {
+            int[] allSplitRounds = new int[10] { 2,3,4,5,10,15,30,50,70,100 };
+
+            for (int i = 0; i < allSplitRounds.Length; i++)
+            {
+                if (allSplitRounds[i] <= maxLevel)
+                {
+                    roundsToSplit.Add(allSplitRounds[i]);
+                }
+            }
+
+            string allSplitRoundsString = "";
+            for (int i = 0; i < roundsToSplit.Count; i++)
+            {
+                allSplitRoundsString += roundsToSplit[i].ToString() + ",";
+            }
+            allSplitRoundsString = allSplitRoundsString.Substring(0, allSplitRoundsString.Length - 1);
+
+            Logger.Log($"Last level is {maxLevel} so we are going to split at [{allSplitRoundsString}], make sure you have set these splits in Livesplit");
         }
 
         private void FindProcess()
@@ -97,61 +121,46 @@ namespace ZombiesAutosplitter
             return state;
         }
 
-        int _currentLevel = 0;
-        int _lastValue = 0;
-        DateTime _levelEndStamp;
+        int _currentLevel = 1;
+        DateTime _levelEndStamp = DateTime.UtcNow;
         bool _timestampSet = false;
         bool _levelIncremented = false;
         public void CheckLevel()
         {
-            //const int waitSpanMS = 10000;
-            
             //// 0x01809A34 = some sort of timer that start at 0 when reset
             //// 0x01809A34 is a few offsets added together
-            //byte[] valBuffer = new byte[4];
-            //IntPtr baseAddress = _process.MainModule.BaseAddress;
-            //IntPtr valAddr = IntPtr.Add(baseAddress, 0x01809A34);
+            //// 165695D = 255 on level change, then 0 just before new level appears then 255 again and then 0 when level is red
 
-            //User32Helper.ReadProcessMemory(_process.Handle, valAddr, valBuffer, 4, out IntPtr numberOfBytesRead);
+            byte[] levelSwapBuffer = new byte[1];
+            IntPtr baseAddress = _process.MainModule.BaseAddress;
+            IntPtr levelSwapAddr = IntPtr.Add(baseAddress, 0x165695D);
+            User32Helper.ReadProcessMemory(_process.Handle, levelSwapAddr, levelSwapBuffer, 1, out IntPtr numberOfBytesRead);
 
-            //int valValue = BitConverter.ToInt32(valBuffer, 0);
+            bool timerValue = BitConverter.ToBoolean(levelSwapBuffer, 0);
 
-            //var ms = (DateTime.Now - _levelEndStamp).TotalMilliseconds;
+            var ms = (DateTime.UtcNow - _levelEndStamp).TotalMilliseconds;
 
-            //// entered once when timer increases
-            //if (valValue > _lastValue && _lastValue > 0 && !_timestampSet)
-            //{
-            //    Logger.Log("entered");
-            //    if (!_timestampSet)
-            //    {
-            //        _levelEndStamp = DateTime.Now;
-            //        _timestampSet = true;
-            //        _levelIncremented = false;
-            //    }
-            //}
-            //else
-            //{
-            //    if (_currentLevel == 0)
-            //    {
-            //        _currentLevel++;
-            //        Logger.Log("LEVEL: " + _currentLevel.ToString());
-            //    }
-            //}
+            if (_timestampSet && !_levelIncremented && ms > 11000)
+            {
+                _timestampSet = false;
+                _levelIncremented = true;
+                _currentLevel++;
 
-            //if (ms > waitSpanMS && _timestampSet && !_levelIncremented)
-            //{
-            //    _currentLevel++;
-            //    Logger.Log("LEVEL: " + _currentLevel.ToString());
-            //    _levelIncremented = true;
-            //}
+                if (roundsToSplit.Any(e => e == _currentLevel))
+                {
+                    Logger.Log("LEVEL: " + _currentLevel.ToString());
+                    LivesplitHelper.Split();
+                }
+            }
 
-            //if (ms > waitSpanMS && _timestampSet && _levelIncremented)
-            //{
-            //    Logger.Log("ready for next level");
-            //    _timestampSet = false;
-            //}
+            if (ms < 20000) return;
 
-            //_lastValue = valValue;
+            if (timerValue && !_timestampSet)
+            {
+                _levelEndStamp = DateTime.UtcNow;
+                _levelIncremented = false;
+                _timestampSet = true;
+            }
         }
 
         private bool hasBeenAboveResetLine = true;
@@ -177,8 +186,7 @@ namespace ZombiesAutosplitter
             {
                 hasBeenAboveResetLine = true;
                 Logger.Log("Reset");
-                _lastValue = 0;
-                _currentLevel = 0;
+                _currentLevel = 1;
                 return true;
             }
 
