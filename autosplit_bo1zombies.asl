@@ -12,6 +12,9 @@
 // 25A31CC , 25A4C9C, 25A66F4, 3570276 can move
 // 1809A34, can move 
 // 16569B6, level??
+// 241C0B4, 241BF4C dogs, 0 = no, 2 = yes
+// 2CC23D4 dogs, 1 = no, 0 = yes
+// 2CC1C40 level drawing state
 
 // current problems:
 // 
@@ -22,7 +25,7 @@ state("BlackOps")
 	int game_paused : 0x8902B4;
 	int timer : 0x2F08A30;
 	int menu_state : 0x4212FEC;
-	int magic_level : 0x232DFDA;
+	int magic_level : 0x1656994;
 	byte dead : 0x1808D34;
 }
 
@@ -31,15 +34,12 @@ startup
     vars.timerModel = new TimerModel { CurrentState = timer };
 	vars.is_paused = (vars.timerModel.CurrentState.CurrentPhase == TimerPhase.Paused);
 	vars.did_reset = false;
-	vars.timer_started = false;
+	vars.timer_started = (vars.timerModel.CurrentState.CurrentPhase != TimerPhase.NotRunning);
 	vars.timer_value = 0;
 	vars.timer_pause_length = 0;
+	
 	vars.current_level = 1;
 	vars.last_level_split = 1;
-	vars.start_level = 1;
-	vars.skipped_wonky_level = false;
-	vars.level_change_stamp = 0;
-	vars.level_tick = 0;
 	
 	vars.start_times = new List<Tuple<int, int>>
 	{
@@ -67,11 +67,12 @@ start
 		{
 			if (vars.timer_value > item.Item2) 
 			{
+				vars.skipped_first = false;
 				vars.timer_started = true;
-				vars.current_level = current.magic_level;
-				vars.start_level = current.magic_level;
-				vars.last_level_split = current.magic_level;
-				vars.skipped_wonky_level = false;
+				vars.current_level = 1;
+				vars.last_level_split = 1;
+				vars.level_change_stamp = 0;
+					
 				return true;
 			}
 		}
@@ -80,7 +81,6 @@ start
 	return false;
 }
 
-/*
 split
 {
 	if (vars.timer_started)
@@ -90,7 +90,7 @@ split
 			int diff = vars.timer_value - vars.level_change_stamp;
 			
 			// wait untill level appears on screen
-			if (diff > 60)
+			if (diff > 55)
 			{
 				print(vars.current_level.ToString() + " --- " + vars.last_level_split.ToString());
 				vars.last_level_split = vars.current_level;
@@ -105,7 +105,6 @@ split
 	
 	return false;
 }
-*/
 
 reset
 {
@@ -148,13 +147,16 @@ update
 		vars.timer_started = false;
 	}
 	
-	if (current.magic_level != old.magic_level)
+	if (old.magic_level == 2000 && current.magic_level == 500)
 	{
-		vars.level_tick++;
-		if (vars.level_tick % 2 == 1)
+		if (vars.skipped_first)
 		{
 			vars.current_level++;
 			vars.level_change_stamp = vars.timer_value;
+		}
+		else
+		{
+			vars.skipped_first = true;
 		}
 	}
 	
