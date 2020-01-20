@@ -14,24 +14,7 @@
 // 16569B6, level??
 
 // current problems:
-// times starts in menu (not really a problem but is annoying)
-
-// scene states per map
-// kino: 5
-// five: 10
-// dead ops arcade: 15
-// ascension: 20
-// moon: 52
-// nacht der untoten: 84
-// verruckt: 116
-// shi no numa: 148
-// der riese: 180
-
-// ingame time per map when player can move (timer starts when player can move)
-// kino: > 190
-// five: > 190
-// dead ops arcade > 0
-// ascension > 580
+// 
 
 state("BlackOps")
 {
@@ -40,6 +23,7 @@ state("BlackOps")
 	int timer : 0x2F08A30;
 	int menu_state : 0x4212FEC;
 	int magic_level : 0x16569B6;
+	byte dead : 0x1808D34;
 }
 
 startup
@@ -152,6 +136,14 @@ update
 			
 		if (vars.timer_started)
 			vars.timerModel.Pause();
+	}
+	
+	
+	if (old.dead != 0 && current.dead == 0)
+	{
+		if (vars.timer_started)
+			vars.timerModel.Pause();
+		vars.timer_started = false;
 	}
 	
 	if (old.magic_level != current.magic_level && old.magic_level != 0)
