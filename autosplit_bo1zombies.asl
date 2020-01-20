@@ -22,7 +22,7 @@ state("BlackOps")
 	int game_paused : 0x8902B4;
 	int timer : 0x2F08A30;
 	int menu_state : 0x4212FEC;
-	int magic_level : 0x16569B6;
+	int magic_level : 0x232DFDA;
 	byte dead : 0x1808D34;
 }
 
@@ -39,6 +39,7 @@ startup
 	vars.start_level = 1;
 	vars.skipped_wonky_level = false;
 	vars.level_change_stamp = 0;
+	vars.level_tick = 0;
 	
 	vars.start_times = new List<Tuple<int, int>>
 	{
@@ -79,6 +80,7 @@ start
 	return false;
 }
 
+/*
 split
 {
 	if (vars.timer_started)
@@ -93,9 +95,9 @@ split
 				print(vars.current_level.ToString() + " --- " + vars.last_level_split.ToString());
 				vars.last_level_split = vars.current_level;
 				
-				int lvl_to_check = vars.current_level - vars.start_level;
+				int lvl_to_check = vars.current_level;
 				
-				if (lvl_to_check <= 5 || lvl_to_check == 15 || lvl_to_check % 10 == 0)
+				if (lvl_to_check <= 5 || lvl_to_check == 15 || (lvl_to_check % 10 == 0 && lvl_to_check <= 100))
 				return true;
 			}
 		}
@@ -103,6 +105,7 @@ split
 	
 	return false;
 }
+*/
 
 reset
 {
@@ -114,7 +117,6 @@ reset
 		vars.timer_pause_length = 0;
 		vars.current_level = 1;
 		vars.last_level_split = 1;
-		vars.start_level = 1;
 		return true;
 	}
 	if (current.timer >= 100)
@@ -146,14 +148,14 @@ update
 		vars.timer_started = false;
 	}
 	
-	if (old.magic_level != current.magic_level && old.magic_level != 0)
+	if (current.magic_level != old.magic_level)
 	{
-		if (!vars.skipped_wonky_level)
-			vars.skipped_wonky_level = true;
-		else
+		vars.level_tick++;
+		if (vars.level_tick % 2 == 1)
+		{
 			vars.current_level++;
-			
-		vars.level_change_stamp = vars.timer_value;
+			vars.level_change_stamp = vars.timer_value;
+		}
 	}
 	
 	// we have our own timer that is basically the ingame timer that pauses when the player pauses the game
