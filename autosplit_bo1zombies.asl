@@ -31,6 +31,18 @@ state("BlackOps")
 
 startup
 {
+	settings.Add("Rounds", true, "Rounds");
+	settings.Add("Level2", true, "Split on level 2", "Rounds");
+	settings.Add("Level3", true, "Split on level 3", "Rounds");
+	settings.Add("Level4", true, "Split on level 4", "Rounds");
+	settings.Add("Level5", true, "Split on level 5", "Rounds");
+	settings.Add("Level15", true, "Split on level 15", "Rounds");
+	settings.Add("Level30", true, "Split on level 30", "Rounds");
+	settings.Add("Level50", true, "Split on level 50", "Rounds");
+	settings.Add("Level70", true, "Split on level 70", "Rounds");
+	settings.Add("Level100", true, "Split on level 100", "Rounds");
+	//settings.Add("Song", true, "Song");
+
     vars.timerModel = new TimerModel { CurrentState = timer };
 	vars.is_paused = (vars.timerModel.CurrentState.CurrentPhase == TimerPhase.Paused);
 	vars.did_reset = false;
@@ -97,8 +109,12 @@ split
 				
 				int lvl_to_check = vars.current_level;
 				
-				if (lvl_to_check <= 5 || lvl_to_check == 15 || (lvl_to_check % 10 == 0 && lvl_to_check <= 100))
-				return true;
+				if (settings["Rounds"]) 
+				{  
+					string toCheck = "Level"+lvl_to_check.ToString();
+					if (settings[toCheck]) 
+					return true;
+				}
 			}
 		}
 	}
