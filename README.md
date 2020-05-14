@@ -15,5 +15,5 @@ Edit Layout > double click Scriptable Auto Splitter > Set Script path to path of
 Click Ok<br>
 Edit Layout > double click Scriptable Auto Splitter > Select Rounds that are desired<br>
 Ok all<br>
-You'll need to manually edit the livesplit splits to personalise you selected rounds.<br>
+You'll need to manually edit the livesplit splits to personalise your selected rounds.<br>
 Save the Layout<br>
