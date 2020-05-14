@@ -12,5 +12,8 @@ in livesplit:<br>
 Open Splits > From File > bo1 blank splits.lss<br>
 Open Layout > From File > zombies_layout.lsl<br>
 Edit Layout > double click Scriptable Auto Splitter > Set Script path to path of autosplit_bo1zombies.asl<br>
+Click Ok<br>
+Edit Layout > double click Scriptable Auto Splitter > Select Rounds that are desired<br>
 Ok all<br>
+You'll need to manually edit the livesplit splits to personalise you selected rounds.<br>
 Save the Layout<br>
