@@ -5,6 +5,7 @@ Will split on Rounds: 2,20,30,40,50,70,100,110,120,130,140,150,163,170,180,190,2
 Round: 2 to check the autosplit is working.<br>
 Rounds: 20,30,40,50 splits are useful for first room players.<br>
 Rounds: 30,50,70,100,...,163,...,260 for high round players.<br>
+Rounds: 30,50,70,100 for speedrunners.<br>
 
 ## using
 in livesplit:<br>
