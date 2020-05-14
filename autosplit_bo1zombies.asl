@@ -33,13 +33,28 @@ startup
 {
 	settings.Add("Rounds", true, "Rounds");
 	settings.Add("Level2", true, "Split on level 2", "Rounds");
-	settings.Add("Level3", true, "Split on level 3", "Rounds");
-	settings.Add("Level4", true, "Split on level 4", "Rounds");
-	settings.Add("Level5", true, "Split on level 5", "Rounds");
-	settings.Add("Level15", true, "Split on level 15", "Rounds");
+	settings.Add("Level20", true, "Split on level 20", "Rounds");
 	settings.Add("Level30", true, "Split on level 30", "Rounds");
+	settings.Add("Level40", true, "Split on level 40", "Rounds");
 	settings.Add("Level50", true, "Split on level 50", "Rounds");
 	settings.Add("Level70", true, "Split on level 70", "Rounds");
+	settings.Add("Level100", true, "Split on level 100", "Rounds");
+	settings.Add("Level110", true, "Split on level 110", "Rounds");
+	settings.Add("Level120", true, "Split on level 120", "Rounds");
+	settings.Add("Level130", true, "Split on level 130", "Rounds");
+	settings.Add("Level140", true, "Split on level 140", "Rounds");
+	settings.Add("Level150", true, "Split on level 150", "Rounds");
+	settings.Add("Level163", true, "Split on level 163", "Rounds");
+	settings.Add("Level170", true, "Split on level 170", "Rounds");
+	settings.Add("Level180", true, "Split on level 180", "Rounds");
+	settings.Add("Level190", true, "Split on level 190", "Rounds");
+	settings.Add("Level200", true, "Split on level 200", "Rounds");
+	settings.Add("Level210", true, "Split on level 210", "Rounds");
+	settings.Add("Level220", true, "Split on level 220", "Rounds");
+	settings.Add("Level230", true, "Split on level 230", "Rounds");
+	settings.Add("Level240", true, "Split on level 240", "Rounds");
+	settings.Add("Level250", true, "Split on level 250", "Rounds");
+	settings.Add("Level260", true, "Split on level 260", "Rounds");
 	settings.Add("Level100", true, "Split on level 100", "Rounds");
 	//settings.Add("Song", true, "Song");
 
@@ -58,14 +73,14 @@ startup
       new Tuple<int, int>(5, 190),		// kino
       new Tuple<int, int>(10, 190),		// five
       new Tuple<int, int>(15, 50),		// dead ops
-	  new Tuple<int, int>(20, 580),		// ascension
-	  new Tuple<int, int>(52, 195),		// moon
-	  new Tuple<int, int>(84, 195),		// nacht der untoten  
-	  new Tuple<int, int>(116, 200),	// verruckt
-	  new Tuple<int, int>(148, 198),	// shi no numa
-	  new Tuple<int, int>(180, 195),	// der riese
-	  
-	  // call of the dead and shangri la not done yet
+      new Tuple<int, int>(20, 580),		// ascension
+      new Tuple<int, int>(28, 190),		// call of the dead
+      new Tuple<int, int>(44, 190),		// shangri la
+      new Tuple<int, int>(76, 195),		// moon
+      new Tuple<int, int>(108, 195),	// nacht der untoten  
+      new Tuple<int, int>(140, 200),	// verruckt
+      new Tuple<int, int>(172, 198),	// shi no numa
+      new Tuple<int, int>(204, 195),	// der riese
 	};
 }
 
