@@ -41,6 +41,23 @@ startup
 	settings.Add("Level50", true, "Split on level 50", "Rounds");
 	settings.Add("Level70", true, "Split on level 70", "Rounds");
 	settings.Add("Level100", true, "Split on level 100", "Rounds");
+	settings.Add("Level110", true, "Split on level 110", "Rounds");
+	settings.Add("Level120", true, "Split on level 120", "Rounds");
+	settings.Add("Level130", true, "Split on level 130", "Rounds");
+	settings.Add("Level140", true, "Split on level 140", "Rounds");
+	settings.Add("Level150", true, "Split on level 150", "Rounds");
+	settings.Add("Level163", true, "Split on level 163", "Rounds");
+	settings.Add("Level170", true, "Split on level 170", "Rounds");
+	settings.Add("Level180", true, "Split on level 180", "Rounds");
+	settings.Add("Level190", true, "Split on level 190", "Rounds");
+	settings.Add("Level200", true, "Split on level 200", "Rounds");
+	settings.Add("Level210", true, "Split on level 210", "Rounds");
+	settings.Add("Level220", true, "Split on level 220", "Rounds");
+	settings.Add("Level230", true, "Split on level 230", "Rounds");
+	settings.Add("Level240", true, "Split on level 240", "Rounds");
+	settings.Add("Level250", true, "Split on level 250", "Rounds");
+	settings.Add("Level260", true, "Split on level 260", "Rounds");
+	
 	//settings.Add("Song", true, "Song");
 
     vars.timerModel = new TimerModel { CurrentState = timer };
