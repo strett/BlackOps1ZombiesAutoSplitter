@@ -8,6 +8,8 @@ Rounds: 30,50,70,100,...,163,...,260 for high round players.<br>
 Rounds: 30,50,70,100 for speedrunners.<br>
 
 ## using
+Run LiveSplit as administrator<br>
+To always run as admin. Right click LiveSplit.exe > Properties > Compatibility tab > Tick "run as administrator > OK <br>
 in livesplit:<br>
 Open Splits > From File > bo1 blank splits.lss<br>
 Open Layout > From File > zombies_layout.lsl<br>
