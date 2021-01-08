@@ -1,24 +1,3 @@
-// Aldrik Ramaekers 19/1/2019
-
-// 4212FEC menu state
-// 421EA98, 1 = zombies menu/game, 0 otherwise
-// 2E8C8AC, 18568 = loading map
-// 01809A34, ingame timer
-// 2F08A30, ingame timer
-// 2EE7F2C, 0 = paused, 1065353216 = playing
-// 8902B4, 4 = paused, 0 = playing
-// 165695D, 255 = level change, then 0 before level appears, then 255 again and then 0 when new round starts and round number color = red
-// 168E564, can move (not good)
-// 25A31CC , 25A4C9C, 25A66F4, 3570276 can move
-// 1809A34, can move 
-// 16569B6, level??
-// 241C0B4, 241BF4C dogs, 0 = no, 2 = yes
-// 2CC23D4 dogs, 1 = no, 0 = yes
-// 2CC1C40 level drawing state
-
-// current problems:
-// 
-
 state("BlackOps")
 {
 	int scene_state : 0x896268;
@@ -33,6 +12,7 @@ startup
 {
 	settings.Add("Rounds", true, "Rounds");
 	settings.Add("Level2", true, "Split on level 2", "Rounds");
+	settings.Add("Level15", true, "Split on level 15", "Rounds");
 	settings.Add("Level20", true, "Split on level 20", "Rounds");
 	settings.Add("Level30", true, "Split on level 30", "Rounds");
 	settings.Add("Level40", true, "Split on level 40", "Rounds");
@@ -44,6 +24,7 @@ startup
 	settings.Add("Level130", true, "Split on level 130", "Rounds");
 	settings.Add("Level140", true, "Split on level 140", "Rounds");
 	settings.Add("Level150", true, "Split on level 150", "Rounds");
+	settings.Add("Level160", true, "Split on level 160", "Rounds");
 	settings.Add("Level163", true, "Split on level 163", "Rounds");
 	settings.Add("Level170", true, "Split on level 170", "Rounds");
 	settings.Add("Level180", true, "Split on level 180", "Rounds");
@@ -177,7 +158,7 @@ update
 	{
 		if (vars.timer_started)
 			vars.timerModel.Pause();
-		vars.timer_started = false;
+		//vars.timer_started = false;
 	}
 	
 	if (old.magic_level == 2000 && current.magic_level == 500)
