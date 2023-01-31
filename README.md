@@ -1,3 +1,6 @@
+This is no longer maintained. 
+I recommend 5and5's AutoSplit timer found here: https://github.com/5and5/LiveSplitAutoSplitterForBlackOpsZombies
+
 Start, pause, reset and splits automatically.<br>
 
 Working on all maps.<br>
